@@ -10,3 +10,7 @@ def index(request):
 
 def show(request,id):
     movie = Movie.objects.get(id=id)
+    name = movie.name
+    template_data = {'title':name,'movie':movie}
+    
+    return render(request,'show.html',{'template_data':template_data})

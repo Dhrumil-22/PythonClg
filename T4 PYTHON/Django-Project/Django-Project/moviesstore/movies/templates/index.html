@@ -15,8 +15,7 @@
         <div class="p-2 card align-items-center pt-4">
           <img alt = "" src="{{m.image.url}}" class="card-img-top rounded">
           <div class="card-body text-center">
-              {{ m.name }}
-
+            <a href="{%url 'show' id=m.id%}" class="btn btn-outline-dark">{{ m.name }}</a>
           </div>
         </div>
       </div>
