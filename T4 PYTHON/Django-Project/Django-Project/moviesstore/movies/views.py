@@ -7,3 +7,6 @@ def index(request):
                      'movies':movies}
     return render(request, 'index.html',
                   {'template_data':template_data})
+
+def show(request,id):
+    movie = Movie.objects.get(id=id)
