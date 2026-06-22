@@ -1,0 +1,1008 @@
+--- File: LEC(3).ipynb ---
+[CODE]:
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import pprint 
+
+[CODE]:
+response = requests.get(r'https://crex.com/series/indian-premier-league-2026-1PW/points-table')
+
+[CODE]:
+f = response.text
+data = BeautifulSoup(f,'html.parser')
+print(data.prettify())
+
+[CODE]:
+d = data.find_all("div",class_="team-wrapper")
+
+pt = {"Qualified":[],"team":[],"match":[],"win":[],"loss":[],'nr':[],'nrr':[],'cupr':[],'pts':[]}
+
+for i in d:
+    t = i.find("div")
+    pt["team"].append(t.text)
+    
+    # print(i)
+    
+da = data.find_all("td")
+q = da[0::8]
+m = da[1::8]
+w = da[2::8]
+l = da[3::8]
+nr = da[4::8]
+nrr = da[5::8]
+cupr = da[6::8]
+pts = da[7::8]
+for i in q:
+    if i.text[0] =='Q':
+        pt["Qualified"].append(i.text[0])
+    else :
+        pt["Qualified"].append("")
+for i in m:
+    pt["match"].append(i.text)
+for i in w:
+    pt["win"].append(i.text)
+for i in l:
+    pt["loss"].append(i.text)
+for i in nr:
+    pt["nr"].append(i.text)
+for i in nrr:
+    pt["nrr"].append(i.text)
+for i in cupr:
+    pt["cupr"].append(i.text)
+for i in pts:
+    pt["pts"].append(i.text)
+    
+pprint.pprint(pt)
+
+df = pd.DataFrame(pt,index=[1,2,3,4,5,6,7,8,9,10])
+df
+
+[CODE]:
+response = requests.get(r'https://www.canva.com/design/DAHKcx5FWSY/zJQlQeiEnQwXm6xX0T-fgA/edit')
+f = response.text
+data = BeautifulSoup(f,'html.parser')
+print(data)
+
+[CODE]:
+d = data.find_all("div",class_="caBU6Q _6gcXHA DKvgGQ")
+print(d)
+
+[CODE]:
+
+
+--- File: LEC1.ipynb ---
+[MARKDOWN]:
+## CH-7 Web Scraping & REST API
+
+[CODE]:
+import requests 
+
+[CODE]:
+response=requests.get(r'https://subslikescript.com/movie/Batman_The_Enemy_Within-7170214')
+
+[CODE]:
+print(response)
+print(response.status_code)
+
+
+[CODE]:
+content=response.text
+print(content)
+
+[CODE]:
+from bs4 import BeautifulSoup
+
+[CODE]:
+data=BeautifulSoup(content,'html.parser')
+print(data.prettify()) # format kar che html no
+
+[CODE]:
+title=data.find('h1')
+print(title)
+
+[CODE]:
+script=data.find('div',class_='full-script')
+print(script.text)
+
+[CODE]:
+response=requests.get(r'https://subslikescript.com/movies')
+print(response)
+
+[CODE]:
+content=response.text
+data=BeautifulSoup(content,'html.parser')
+print(data)
+
+[CODE]:
+article=data.find('article',class_='main-article')
+print(article)
+
+[CODE]:
+l=article.find_all('a')
+print(l)
+
+[CODE]:
+print(len(l))
+
+
+[CODE]:
+links=[]
+for i in l:
+    links.append(i['href'])
+print(links)
+
+[CODE]:
+for i in links:
+    url='https://subslikescript.com'+i
+    response=requests.get(url)
+    data=BeautifulSoup(response.text,'html.parser')
+    title=data.find('h1').text
+    script=data.find('div',class_='full-script').text
+    f=open(title+'.txt','w',encoding='utf-8')
+    f.write(script)
+    print(f'{title} File Created Successfully')
+    f.close()
+    
+
+[CODE]:
+user=int(input("Enter Page Nummbers"))
+for i in range(user):
+    url='https://subslikescript.com/movies?page='+str(i+1)
+    response=requests.get(url)
+    content=response.text
+    data=BeautifulSoup(content,'html.parser')
+    article=data.find('article',class_='main-article')
+    L=article.find_all('a')
+    links=[]
+    for i in L:
+        links.append(i['href'])
+    for i in links:
+        url='https://subslikescript.com'+i
+        response=requests.get(url)
+        data=BeautifulSoup(response.text,'html.parser')
+        title=data.find('h1').text
+        script=data.find('div',class_='full-script').text
+        f=open(title+'.txt','w',encoding='utf-8')
+        f.write(script)
+        print(f'{title} File Created Successfully')
+        f.close()
+    
+        
+
+[CODE]:
+response=requests.get(r'https://books.toscrape.com/')
+print(response)
+
+[CODE]:
+content=response.text
+# print(content)
+data=BeautifulSoup(content)
+t=data.find_all('h3')
+print(t)
+titles=[]
+for i in t:
+    x=i.find('a')['title']
+    titles.append(x)
+print(titles)
+
+[CODE]:
+content=response.text
+data=BeautifulSoup(content)
+t=data.find_all('p',class_='price_color')
+print(t)
+price=[]
+for i in t:
+    x=i.text
+    price.append(x)
+print(price)
+
+[CODE]:
+img=data.find_all('img',class_='thumbnail')
+print(img)
+image=[]
+for i in img:
+    c=i['src']
+    image.append(c)
+print(image)
+
+[CODE]:
+import pandas as pd
+d={
+    'Title':titles,
+    'Price':price,
+    'Image Source':image
+}
+df=pd.DataFrame(d)
+df
+
+[CODE]:
+import requests
+response = requests.get('https://www.politifact.com/factchecks/list/')
+content = response.text
+data = BeautifulSoup(content,"html.parser")
+
+[CODE]:
+s = data.find_all("div", class_="m-statement__quote")
+line=[]
+for i in s:
+    line.append(i.text.strip())
+print(line)
+
+[CODE]:
+x = data.find_all("div", class_="m-statement__name")
+soruce = []
+for i in x :
+    soruce.append(i.text.strip())
+print(soruce)
+
+[CODE]:
+f = data.find_all("footer", class_="m-statement__footer")
+date = []
+for i in f :
+    date.append(i.text.split("•")[1].strip())
+print(date)
+
+[CODE]:
+f = data.find_all("footer", class_="m-statement__footer")
+auth = []
+for i in f :
+    auth.append(i.text.split("•")[0].strip().split('By')[1])
+print(auth)
+
+[CODE]:
+im = data.find_all("img",{'alt':True},class_="c-image__original")
+img = []
+for i in im :
+    img.append(i['alt'])
+print(img)
+
+[CODE]:
+import pandas as pd
+
+d = {
+    'Statement' : line,
+    "source" : soruce,
+    "date" : date,
+    "Author" : auth,
+    "image" : img
+}
+df = pd.DataFrame(d)
+df
+
+[CODE]:
+
+
+[MARKDOWN]:
+
+
+[CODE]:
+data = BeautifulSoup(f,'html.parser')
+print(data)
+
+[CODE]:
+import json
+url="http://ip-api.com/json/"
+resp = requests.get(url)
+print(resp)
+
+[CODE]:
+import pprint
+json_page = json.loads(resp.text)
+# print(json_page)
+pprint.pprint(json_page)
+
+--- File: LEC2.IPYNB ---
+[CODE]:
+import requests 
+from bs4 import BeautifulSoup
+
+[CODE]:
+f = open('newFlipkart.html')    
+data = BeautifulSoup(f,'html.parser')
+print(data)
+
+[MARKDOWN]:
+mobile name
+rating
+rating count  Wphh3N
+rom  J+igdf
+actual price yRaY8j ZYYwLA
+discounteed price Nx9bqj _4b5DiR
+
+[CODE]:
+f = data.find_all("div", class_="KzDlHZ")
+name = []
+for i in f :
+    name.append(i.text)
+print(len(name))
+
+
+[CODE]:
+
+
+[CODE]:
+f = data.find_all("div", class_="XQDdHH")
+rating = []
+for i in f :
+    rating.append(i.text)
+print(len(rating))
+
+[CODE]:
+f = data.find_all("span", class_="Wphh3N")
+ratc = []
+for i in f :
+    ratc.append(i.text.split()[0])
+print(len(ratc))
+
+[CODE]:
+f = data.find_all("li", class_="J+igdf")
+rom1 = []
+rom = []
+for i in f :
+    rom1.append(i.text[0:10])
+rom=rom1[0::5]
+print(len(rom))
+
+[CODE]:
+f = data.find_all("div", class_="yRaY8j ZYYwLA")
+actuP = []
+for i in f :
+    x = ''.join((i.text.strip("₹").split(",")))
+    actuP.append(int(x))
+print(actuP)
+
+[CODE]:
+
+f = data.find_all("div", class_="Nx9bqj _4b5DiR")
+dicP = []
+for i in f :
+    x = ''.join((i.text.strip("₹").split(",")))
+    dicP.append(int(x))
+print(dicP)
+
+[CODE]:
+import pandas as pd
+d = {
+    "name"  :name,
+    "Rating" : rating,
+    "Rating Count" : ratc,
+    "Memory" : rom,
+    "Actual Price": actuP,
+    "Discounted Price" : dicP
+}
+
+df = pd.DataFrame(d)
+df['Diifrance'] = df["Actual Price"] - df["Discounted Price"]
+df
+
+[CODE]:
+# from bs4 import BeautifulSoup
+# import pandas as pd
+# with open("List of state and union territory capitals in India - Wikipedia (5_19_2026 12：45：36 PM).html",encoding='utf-8') as file:
+#     html=file.read()
+# soup= BeautifulSoup(html,'html.parser')
+# print(soup)
+
+# tables=soup.find_all('table',{'class':'wikitable'})
+# print(tables)
+
+# # Extract the content of the table
+# def extract_table(table):
+#     # Extract headers
+#     headers=[header.get_text(strip=True) for header in table.find_all('th')]
+#     # extract rows 
+#     rows=table.find_all('tr')[1:]
+#     # table data
+#     table_data=[]
+#     # Iterate
+#     for row in rows:
+#         cells=row.find_all('td')
+#         rowdata=[cell.get_text(strip=True) for cell in cells]
+#         table_data.append(rowdata)
+#     return headers,table_data
+
+
+
+[CODE]:
+# import pandas as pd
+# headers1,data1=extract_table(tables[0])
+# headers2,data2=extract_table(tables[1])
+
+# # create dataframe
+# dfstates=pd.DataFrame(data1, columns=headers1)
+# dfunion=pd.DataFrame(data2,columns=headers2)
+    
+
+# dfstates
+
+[CODE]:
+
+
+--- File: LEC3(1).ipynb ---
+[CODE]:
+from bs4 import BeautifulSoup 
+import pprint
+import pandas as pd
+
+
+[CODE]:
+f = open("indeed jobs.html")
+data = BeautifulSoup(f,'html.parser')
+
+
+[CODE]:
+jobs = data.find_all("div",class_="job_seen_beacon")
+print(len(jobs))
+
+[CODE]:
+dict = {'Title':[],'Compny':[],'Location':[],'Discription':[]}
+for i in jobs:
+    t = i.find("h2",class_="jobTitle css-1psdjh5 eu4oa1w0")
+    dict["Title"].append(t.text)
+    
+    c = i.find("div",class_="css-1afmp4o e37uo190")
+    dict["Compny"].append(c.text)
+    
+    l = i.find("div",class_="css-1restlb eu4oa1w0")
+    dict["Location"].append(l.text)
+    
+    d = i.find("div",class_="jobMetaDataGroup css-qspwa8 eu4oa1w0")
+    # dict["Discription"].append(d.text)
+    if d != None:
+        dict["Discription"].append(d.text)
+    else:
+        dict["Discription"].append("")
+        
+        
+    
+pprint.pprint(dict)
+
+df = pd.DataFrame(dict)
+df
+
+
+
+[CODE]:
+
+
+--- File: LEC3(2).ipynb ---
+[CODE]:
+import pandas as pd
+from bs4 import BeautifulSoup 
+import pprint
+
+
+[CODE]:
+f = open("Scrape_this.html")
+data = BeautifulSoup(f,'html.parser')
+
+
+[CODE]:
+col = data.find_all("div",class_="right-part")
+print(len(col))
+
+[CODE]:
+dict = {"company":[],"Price":[],"low":[],"high":[],"value":[]}
+
+c = data.find_all("td",class_="")
+for i in c:
+    com = i.find('a')
+    dict["company"].append(com.text) 
+
+
+d = data.find_all("td",class_="txt-right")
+cp = d[0::5]
+l = d[1::5]
+h = d[2::5]
+vol = d[3::5]
+
+for i in cp:
+    dict["Price"].append(i.text)
+for i in l:
+    dict["low"].append(i.text)
+for i in h:
+    dict["high"].append(i.text)
+for i in vol:
+    dict["value"].append(i.text)
+    
+    
+pprint.pprint(dict)
+
+[CODE]:
+df = pd.DataFrame(dict)
+df
+
+
+[CODE]:
+
+
+--- File: LEC4.ipynb ---
+[CODE]:
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import pprint 
+
+[CODE]:
+api_Key = "6418d6e58a08b69ee8b6c947e98e3c3a"
+
+[CODE]:
+url = f"http://api.openweathermap.org/geo/1.0/direct?q=Ahmedabad&limit=5&appid={api_Key}"
+response = requests.get(url)
+pprint.pprint(response.json())
+
+[CODE]:
+import json
+result = response.json()
+print(json.dumps(result,indent=3))
+lat = result[0]['lat']
+lon = result[0]['lon']
+
+[CODE]:
+url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_Key}"
+res = requests.get(url)
+print(res)
+
+[CODE]:
+result = res.json()
+a = json.dumps(result,indent=4)
+print(a)
+
+[CODE]:
+des = result["weather"][0]['description']
+print("Description :",des)
+
+temp = result["main"]['temp']
+print("Temprature:",temp)
+
+press = result["main"]['pressure']
+print("Pressure :",press)
+
+ws = result["wind"]['speed']
+print("WindSpeed : ",ws)
+
+vs = result["visibility"]
+print("Visibility : ",vs)
+
+[CODE]:
+url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={api_Key}"
+res = requests.get(url)
+print(res)
+result = res.json()
+a = json.dumps(result,indent=4)
+print(a)
+
+[CODE]:
+des = result["weather"][0]['description']
+print("Description :",des)
+
+temp = result["main"]['temp']
+print("Temprature:",temp)
+
+press = result["main"]['pressure']
+print("Pressure :",press)
+
+ws = result["wind"]['speed']
+print("WindSpeed : ",ws)
+
+vs = result["visibility"]
+print("Visibility : ",vs)
+
+[CODE]:
+
+
+[CODE]:
+url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={api_Key}"
+res = requests.get(url)
+print(res)
+result = res.json()
+a = json.dumps(result,indent=4)
+print(a)
+
+[CODE]:
+aqi = result["list"][0]['main']['aqi']
+print('aqi : ',aqi)
+
+[CODE]:
+d = {1:"Good",2:"fair",3:"moderate",4:"poor",5:"very poor"}
+print(d[aqi])
+
+[CODE]:
+
+
+[CODE]:
+url = f"http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat={lat}&lon={lon}&appid={api_Key}"
+res = requests.get(url)
+print(res)
+result = res.json()
+a = json.dumps(result,indent=4)
+print(a)
+
+[CODE]:
+dt = result["list"][3]['dt']
+print('dt : ',dt)
+
+[CODE]:
+import datetime
+dt_object = datetime.datetime.fromtimestamp(dt)
+
+print(dt_object)
+
+[CODE]:
+
+url = f"http://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_Key}"
+res = requests.get(url)
+print(res)
+result = res.json()
+a = json.dumps(result,indent=4)
+print(a)
+print(len(result['list']))
+
+[CODE]:
+d = {'Description':[],
+     'Max Temp':[],
+     'Humidity':[],
+     'Wind Speed':[],
+     'Date_time':[]}
+
+for i in result['list']:
+    d['Description'].append(i['weather'][0]['description'])
+    d['Max Temp'].append(i['main']['temp_max'])
+    d['Humidity'].append(i['main']['humidity'])
+    d['Wind Speed'].append(i['wind']['speed'])
+    d['Date_time'].append(i['dt_txt'])
+pprint.pprint(d)
+
+    
+
+[CODE]:
+df = pd.DataFrame(d)
+df
+
+[CODE]:
+
+
+--- File: LEC5.ipynb ---
+[CODE]:
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import pprint 
+
+[CODE]:
+url=f"https://jsonplaceholder.typicode.com/posts"
+response=requests.get(url)
+print(response.json())
+
+
+import requests
+params={'userId':1}
+url='https://jsonplaceholder.typicode.com/posts'
+response=requests.get(url,params=params)
+print(response.json())
+
+[CODE]:
+headers={
+    'user-Agent':'Mozilla/5.0',
+    'Accept':'application/json'
+}
+url='https://jsonplaceholder.typicode.com/posts'
+response=requests.get(url,headers=headers)
+print(response.headers)
+
+[CODE]:
+new_post={
+    'userid':1,
+    'title':'Learning Request',
+    'body':'This is tutorial content'
+}
+url='https://jsonplaceholder.typicode.com/posts'
+response=requests.post(url,json=new_post)
+print(response.status_code)
+print(response.json())
+
+[CODE]:
+updated_post={
+    'id':1,
+    'title':'update title',
+    'body':'update body',
+    'userid':1
+}
+url='https://jsonplaceholder.typicode.com/posts'
+response=requests.post(url,json=new_post)
+print(response.status_code)
+print(response.json())
+
+[CODE]:
+url='https://jsonplaceholder.typicode.com/posts/1'
+response=requests.delete(url)
+print(response.status_code)
+print(response.json())
+
+[CODE]:
+url='https://jsonplaceholder.typicode.com/posts'
+token = 'my_secret_token'
+headers = {
+    'Authorization':f'Bearer {token}'
+}
+response=requests.get(url,headers=headers)
+print(response.status_code)
+
+[MARKDOWN]:
+## Pagination
+
+[CODE]:
+url='https://jsonplaceholder.typicode.com/posts'
+params = {
+    '_page':1,
+    '_limit':5
+}
+response=requests.get(url,params=params)
+print(response.json())
+
+
+[CODE]:
+page = 1
+while page<=3:
+    url='https://jsonplaceholder.typicode.com/posts'
+    params = {
+        '_page':1,
+        '_limit':5
+    }
+    response=requests.get(url,params=params)
+    print(f'page:{page}')
+    print(response.json())
+    page+=1
+
+[CODE]:
+import json
+http = 'https://my-json-server.typicode.com/kavit88/apidemo/db'
+response=requests.get(http)
+result=response.json()
+with open('demo.json','w') as f:
+    json.dump(result,f,indent=4)
+with open('demo.json','r') as f:
+    data = json.load(f)
+print(data)
+
+
+[CODE]:
+import requests
+
+# =====================================================
+# BASE URL
+# =====================================================
+
+BASE_URL = "http://127.0.0.1:8000"
+
+# =====================================================
+# TOKEN
+# =====================================================
+
+TOKEN = "mysecret123"
+
+# =====================================================
+# COMMON PARAMS
+# =====================================================
+
+params = {
+    "api_token": TOKEN
+}
+
+# =====================================================
+# GET ALL STUDENTS
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/students",
+    params={
+        "api_token": TOKEN,
+        "skip": 0,
+        "limit": 5
+    }
+)
+
+print("\n==============================")
+print("GET ALL STUDENTS")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# GET SINGLE STUDENT
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/students/1",
+    params=params
+)
+
+print("\n==============================")
+print("GET SINGLE STUDENT")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# POST API
+# =====================================================
+
+new_student = {
+    "id": 999,
+    "name": "NEW STUDENT",
+    "roll_no": 999,
+    "division": "A7",
+    "marks": "25"
+}
+
+response = requests.post(
+    f"{BASE_URL}/students",
+    json=new_student,
+    params=params
+)
+
+print("\n==============================")
+print("POST API")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# CHECK DATA AFTER POST
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/students/999",
+    params=params
+)
+
+print("\n==============================")
+print("CHECK AFTER POST")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# PUT API (FULL UPDATE)
+# =====================================================
+
+updated_student = {
+    "id": 999,
+    "name": "UPDATED STUDENT",
+    "roll_no": 500,
+    "division": "A4",
+    "marks": "30"
+}
+
+response = requests.put(
+    f"{BASE_URL}/students/999",
+    json=updated_student,
+    params=params
+)
+
+print("\n==============================")
+print("PUT API")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# CHECK DATA AFTER PUT
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/students/999",
+    params=params
+)
+
+print("\n==============================")
+print("CHECK AFTER PUT")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# PATCH API (PARTIAL UPDATE)
+# =====================================================
+
+patch_data = {
+    "marks": "35"
+}
+
+response = requests.patch(
+    f"{BASE_URL}/students/999",
+    json=patch_data,
+    params=params
+)
+
+print("\n==============================")
+print("PATCH API")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# CHECK DATA AFTER PATCH
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/students/999",
+    params=params
+)
+
+print("\n==============================")
+print("CHECK AFTER PATCH")
+print("==============================")
+
+print(response.json())
+
+response = requests.get(
+    f"{BASE_URL}/students/999",
+    params=params
+)
+print(response.json())
+# =====================================================
+# DELETE API
+# =====================================================
+
+response = requests.delete(
+    f"{BASE_URL}/students/999",
+    params=params
+)
+
+print("\n==============================")
+print("DELETE API")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# CHECK AFTER DELETE
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/students/999",
+    params=params
+)
+
+print("\n==============================")
+print("CHECK AFTER DELETE")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# HEADERS API
+# =====================================================
+
+response = requests.get(
+    f"{BASE_URL}/headers",
+    params=params
+)
+
+print("\n==============================")
+print("HEADERS API")
+print("==============================")
+
+print(response.json())
+
+# =====================================================
+# RATE LIMIT TEST
+# =====================================================
+
+print("\n==============================")
+print("RATE LIMIT TEST")
+print("==============================")
+
+for i in range(12):
+
+    response = requests.get(
+        f"{BASE_URL}/students",
+        params=params
+    )
+
+    print(f"Request {i+1} --> Status Code:", response.status_code)
+
+[CODE]:
+

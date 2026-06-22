@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Web Scraping & REST API Notes</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; max-width: 900px; margin: auto; background-color: #f4f4f9; color: #333; }
+        h1, h2, h3 { color: #2c3e50; }
+        pre { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        code { font-family: Consolas, monospace; }
+        p code, li code { background: #e8e8e8; padding: 2px 5px; border-radius: 3px; color: #c7254e; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 20px;}
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Python Course Notes</h1>
+    
+    <h2>1. List of Imports Used in the Files</h2>
+    <ul>
+        <li><code>import requests</code> - Used to send HTTP requests to websites or APIs.</li>
+        <li><code>from bs4 import BeautifulSoup</code> - Used to parse HTML and extract data.</li>
+        <li><code>import pandas as pd</code> - Used to structure extracted data into tables/DataFrames.</li>
+        <li><code>import pprint</code> - Used to neatly print dictionaries and JSON data.</li>
+        <li><code>import json</code> - Used to parse and save JSON data.</li>
+        <li><code>import datetime</code> - Used to convert timestamps to readable dates.</li>
+    </ul>
+
+    <hr>
+
+    <h2>2. How to Read from a Link (Website)</h2>
+    <p>Using <code>requests.get()</code> to fetch a live webpage and <code>BeautifulSoup</code> to parse it:</p>
+<pre><code>response = requests.get(r'https://subslikescript.com/movie/Batman_The_Enemy_Within-7170214')
+content = response.text
+data = BeautifulSoup(content, 'html.parser')
+
+print(data.prettify()) # To format the HTML nicely
+</code></pre>
+
+    <hr>
+
+    <h2>3. How to Read from a Local HTML File</h2>
+    <p>Using standard <code>open()</code> to read a local <code>.html</code> file and parsing it:</p>
+<pre><code>f = open('newFlipkart.html')    
+data = BeautifulSoup(f, 'html.parser')
+
+# Or with encoding if needed:
+# with open("List of state.html", encoding='utf-8') as file:
+#     html = file.read()
+# data = BeautifulSoup(html, 'html.parser')
+</code></pre>
+
+    <hr>
+
+    <h2>4. How to Find Elements in the HTML</h2>
+    <p>Using <code>find()</code> for a single element and <code>find_all()</code> for multiple elements:</p>
+<pre><code># Finding a single element (e.g., h1 tag)
+title = data.find('h1')
+print(title.text)
+
+# Finding multiple elements (e.g., all divs with a specific class)
+scripts = data.find_all("div", class_="full-script")
+
+# Extracting links (href attribute)
+links = data.find_all('a')
+for link in links:
+    print(link['href'])
+</code></pre>
+
+    <hr>
+
+    <h2>5. How to Store Scraped Data into a Pandas DataFrame</h2>
+    <p>Iterate through elements, save them to a dictionary of lists, and convert to a DataFrame:</p>
+<pre><code># Extracting elements
+jobs = data.find_all("div", class_="job_seen_beacon")
+
+# Setting up a dictionary
+job_dict = {'Title': [], 'Company': [], 'Location': []}
+
+for i in jobs:
+    t = i.find("h2", class_="jobTitle")
+    job_dict["Title"].append(t.text)
+    
+    c = i.find("div", class_="css-1afmp4o")
+    job_dict["Company"].append(c.text)
+
+# Creating the DataFrame
+df = pd.DataFrame(job_dict)
+df
+</code></pre>
+
+    <hr>
+
+    <h2>6. How to Read from JSON REST APIs</h2>
+    <p>Using <code>requests</code> to fetch JSON data, passing parameters, and parsing the response:</p>
+<pre><code>api_Key = "6418d6e58a08b69ee8b6c947e98e3c3a"
+url = f"http://api.openweathermap.org/geo/1.0/direct"
+
+# Passing query params
+params = {'q': 'Ahmedabad', 'limit': 5, 'appid': api_Key}
+response = requests.get(url, params=params)
+
+# Reading the JSON response
+result = response.json()
+pprint.pprint(result)
+</code></pre>
+
+    <hr>
+
+    <h2>7. How to Write and Read Local Files</h2>
+    
+    <h3>Writing to a Text File</h3>
+<pre><code>title = "Movie Name"
+script = "Script content here..."
+
+f = open(title + '.txt', 'w', encoding='utf-8')
+f.write(script)
+f.close()
+</code></pre>
+
+    <h3>Writing and Reading JSON Files</h3>
+<pre><code>import json
+
+# Writing to a JSON file
+with open('demo.json', 'w') as f:
+    json.dump(result, f, indent=4)
+
+# Reading from a JSON file
+with open('demo.json', 'r') as f:
+    data = json.load(f)
+print(data)
+</code></pre>
+
+</div>
+</body>
+</html>
