@@ -28,6 +28,7 @@ urlpatterns = [
     path('about/',views.about,name='about'),
     path('movies/',MV.index, name = 'index'),   
     path('movies/<int:id>',MV.show,name='show'),
+    path('movies/<int:id>/review/create',MV.create_review,name='create_review'),
     path('accounts/',include('accounts.urls'))
 ]
 urlpatterns += static(settings.MEDIA_URL, 
