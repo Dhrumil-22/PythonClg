@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from .models import Movie
+from .models import Movie,Review
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 def index(request):
     movies = Movie.objects.all()
@@ -14,3 +15,14 @@ def show(request,id):
     template_data = {'title':name,'movie':movie}
     
     return render(request,'show.html',{'template_data':template_data})
+
+def create_review(request,id):
+    if request.method == "POST" and request.POST("comment") != '':
+        movie = Movie.objects.get(id=id)
+        review = Review()
+        review.commnet  = request.POST['comment']
+        review.movie = movie
+        review.user = request.user
+        review.save()
+    
+        
